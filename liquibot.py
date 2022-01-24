@@ -20,6 +20,10 @@ def vaultCount(_vaultAddress):
     vault_contract = web3.eth.contract(address=_vaultAddress, abi=abi.MAIvaultABI)
     return vault_contract.functions.vaultCount().call()
 
+def vaultDebt(_vaultID, _vaultAddress):
+    vault_contract = web3.eth.contract(address=_vaultAddress, abi=abi.MAIvaultABI)
+    return vault_contract.functions.vaultDebt(_vaultID).call()
+
 def checkRatio(_vaultID, _vaultAddress):
     vault_contract = web3.eth.contract(address=_vaultAddress, abi=abi.MAIvaultABI)
     return vault_contract.functions.checkCollateralPercentage(_vaultID).call()
@@ -32,6 +36,7 @@ def findRiskyVault(_vaultAddress):
         try:
             if checkRatio(id, _vaultAddress) <= 120 and checkRatio(id, _vaultAddress) != 0:
                 print(id)
+                print("Vault liquidable with",vaultDebt(id, _vaultAddress)*10**-18,"usd")
                 riskyvaults.append(id)
         except Exception as e:
             print("Error", e.__class__, "occurred.")
@@ -45,6 +50,12 @@ lis = {}
 for x in range(len(ls)):
     lis[ns[x]] = findRiskyVault(ls[x])
 
+# lis[ns[2]] = findRiskyVault(ls[2])
+
+for x in lis["BAL"]:
+    if checkLiquidation(x, ls[2]) == True:
+        print("Vault liquidable with",vaultDebt(x, ls[2])*10**-18,"usd")
+    
 print(lis)
 
 # print(vaultCount(vaultRouterAddressWETH), "vault open")
